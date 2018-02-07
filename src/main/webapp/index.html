@@ -1,146 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" >
+
     <head>
-        <title>Web sockets</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <style>
-            input[type='submit'], button, [aria-label]{
-                cursor: pointer;
-            }
-            #spoiler{
-                display: none;
-            }
-        </style>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>Personas</title>
+        <link rel='stylesheet prefetch' href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css'/>
+        <link rel='stylesheet prefetch' href='http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css'/>
+        <link rel="stylesheet" href="css/style.css"/>
     </head>
     <body>
-        <form action="javascript:void(0);" method="POST" onsubmit="app.Recuperar()"> 
-            <!--  <input type="text" id="add-name" placeholder="New country">-->
-            <input type="submit" value="Recuperar">
-        </form>`
-        <div id="spoiler" role="aria-hidden">
-            <form action="javascript:void(0);" method="POST" id="saveEdit">
-                <input type="text" id="edit-name">
-                <input type="submit" value="Edit" /> <a onclick="CloseInput()" aria-label="Close">&#10006;</a>
+        <div class="container">
+            <h1>Personas Web Socket</h1>
+            <form action="javascript:void(0);" method="POST" id="recuperarbtn" onsubmit="recuperar()">
+                <input id="recuperar-btn" type="submit" value="Recuperar" class="btn btn-primary"/>
             </form>
+
+            <div id="table" class="table-editable">
+
+                <table class="table">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+
+                    </tr>
+                    <tr>
+
+                        <!-- <td contenteditable="true">Stir Fry</td>
+                        <td contenteditable="true">stir-fry</td><td>
+                            <span class="table-remove glyphicon glyphicon-remove"></span>
+                        </td>
+                        <td>
+                            <span class="table-up glyphicon glyphicon-arrow-up"></span>
+                            <span class="table-down glyphicon glyphicon-arrow-down"></span>
+                        </td>-->
+                    </tr>
+                    <!-- This is our clonable table line -->
+                    <tr class="hide">
+                        <td contenteditable="true">Cambiar</td>
+                        <td contenteditable="true">Cambiar</td>
+                        <!-- <td>
+                             <span class="table-remove glyphicon glyphicon-remove"></span>
+                         </td>
+                         <td>
+                             <span class="table-up glyphicon glyphicon-arrow-up"></span>
+                             <span class="table-down glyphicon glyphicon-arrow-down"></span>
+                         </td>-->
+                    </tr>
+                </table>
+            </div>
+            <form action="javascript:void(0);" method="POST" id="guardarbtn" onsubmit="guardar()">
+                <input id="recuperar-btn" type="submit" value="Guardar" class="btn btn-primary"/>
+            </form>
+
+            <p id="export"></p>
         </div>
-        <p id="counter"></p>
-
-        <table>
-            <tr>
-                <th>Name</th>
-            </tr>
-            <tbody id="countries">
-            </tbody>
-        </table>
-        <script>
-
-
-            var app = new function () {
-                var countries = [];
-                var wsocket;
-                function connect() {
-                    wsocket = new WebSocket("ws://localhost:8080/WebSocketCRUD-1.0/directorio");
-                    wsocket.onmessage = onMessage;
-                    // wsocket.onopen = () => wsocket.send('getAll');
-                }
-                function onMessage(evt) {
-                    //     var arraypv = evt.data.split("/");
-                    console.log(evt.data);
-                    countries = JSON.parse(evt.data);
-                    //       this.countries =evt.data;
-
-                    console.log(JSON.stringify(countries));
-                    app.FetchAll();
-                    //   document.getElementById("price").innerHTML = arraypv[0];
-                    // document.getElementById("volume").innerHTML = arraypv[1];
-                }
-                window.addEventListener("load", connect, false);
-
-
-                this.el = document.getElementById('countries');
-                //  this.countries = ['France', 'Germany', 'England', 'Spain', 'Belgium', 'Italy', 'Portugal', 'Irland', 'Luxembourg'];
-                this.Count = function (data) {
-                    var el = document.getElementById('counter');
-                    var name = 'country';
-                    if (data) {
-                        if (data > 1) {
-                            name = 'Personas';
-                        }
-                        el.innerHTML = data + ' ' + name;
-                    } else {
-                        el.innerHTML = 'No ' + name;
-                    }
-                };
-                this.Recuperar = function () {
-                    wsocket.send('getAll');
-                }
-
-                this.FetchAll = function () {
-                    var data = '';
-                    if (countries.length > 0) {
-                        for (i = 0; i < countries.length; i++) {
-                            data += '<tr>';
-                            data += '<td>' + countries[i] + '</td>';
-                            data += '<td><button onclick="app.Edit(' + i + ')">Edit</button></td>';
-                            data += '<td><button onclick="app.Delete(' + i + ')">Delete</button></td>';
-                            data += '</tr>';
-                        }
-                    }
-                    this.Count(countries.length);
-                    return this.el.innerHTML = data;
-                };
-                this.Add = function () {
-                    el = document.getElementById('add-name');
-                    // Get the value
-                    wsocket.send("add;" + el.value);
-                    var country = el.value;
-                    if (country) {
-                        // Add the new value
-                        countries.push(country.trim());
-                        // Reset input value
-                        el.value = '';
-                        // Dislay the new list
-                        this.FetchAll();
-                    }
-                };
-                this.Edit = function (item) {
-                    var el = document.getElementById('edit-name');
-                    // Display value in the field
-                    el.value = countries[item];
-                    // Display fields
-                    document.getElementById('spoiler').style.display = 'block';
-                    self = this;
-                    document.getElementById('saveEdit').onsubmit = function () {
-                        // Get value
-                        var country = el.value;
-                        if (country) {
-                            // Edit value
-                            countries.splice(item, 1, country.trim());
-                            wsocket.send("edit;" + item + ";" + el.value);
-                            // Display the new list
-                            self.FetchAll();
-                            // Hide fields
-                            CloseInput();
-                        }
-                    };
-                };
-                this.Delete = function (item) {
-                    // Delete the current row
-                    countries.splice(item, 1);
-                    wsocket.send("delete;" + item);
-                    // Display the new list
-                    this.FetchAll();
-                };
-
-            };
-            //  app.FetchAll();
-            function CloseInput() {
-                document.getElementById('spoiler').style.display = 'none';
-            }
-            ;
-        </script>
-
-        
+        <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+        <script src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js'></script>
+        <script src='https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js'></script>
+        <script src='http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore.js'></script>
+        <script  src="js/index.js"></script>
     </body>
-</html>
 
+</html>

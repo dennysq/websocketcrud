@@ -35,8 +35,7 @@ public class PersonasEndPoint {
     static List<Persona> personas = new ArrayList<>();
 
     /* PriceVolumeBean calls this method to send updates */
-    public static void send(double price, int volume) {
-        String msg = String.format("%.2f / %d", price, volume);
+    public static void send(String msg) {
         try {
             /* Send updates to all open WebSocket sessions */
             for (Session session : queue) {
